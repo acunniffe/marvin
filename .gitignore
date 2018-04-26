@@ -1,0 +1,7 @@
+.idea/
+project/target
+project/project/target
+target/
+runtime/target
+training/target
+common/target
