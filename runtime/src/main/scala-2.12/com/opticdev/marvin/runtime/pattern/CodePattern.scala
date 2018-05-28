@@ -12,7 +12,7 @@ case class CodePattern(components: PatternComponent*) {
     val rangedPattern = patternMatcher.rangedPatternFromAst(astNode)
     val compareToPatternComponents = Helpers.trimWhiteSpace(rangedPattern.originalComponents.map(_.component))
 
-    var rangedPatternComponentsBuffer = rangedPattern.originalComponents
+    var rangedPatternComponentsBuffer: Seq[RangedPatternComponent] = rangedPattern.originalComponents
 
     if (compareToPatternComponents.size != components.size) return CodePatternMatch(false)
 
@@ -33,7 +33,21 @@ case class CodePattern(components: PatternComponent*) {
               }
               isMatch
             }
-            case (source: ChildNodeList, target: ChildNodeList) => source.key == target.key
+            case (source: ChildNodeList, target: ChildNodeList) => {
+              if (source.key == target.key) {
+                //if we can't extract any delineators from code, use the default
+                if (source.topDelineator == null) {
+                  val existingComponent = rangedPatternComponentsBuffer(index)
+                  rangedPatternComponentsBuffer = rangedPatternComponentsBuffer.patch(index,
+                    Seq(RangedPatternComponent(existingComponent.start, existingComponent.end,
+                      source.copy(topDelineator = target.topDelineator))),
+                    1)
+                }
+                true
+              } else {
+                false
+              }
+            }
             case (source, target) => source == target
           }
 

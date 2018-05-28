@@ -20,7 +20,7 @@ class AstArrayMapping(var items: Seq[AstMapping])(implicit childNodeList: ChildN
 
         if (index == 0) {
           item.withBefore(None)
-        } else if (index != 0 && item.before.isEmpty) {
+        } else if (index != 0 && item.before.isEmpty && mappings(index-1).after.isEmpty) {
           item.withBefore(Some(childNodeList.topDelineator))
         } else {
           item
