@@ -2,7 +2,8 @@ package com.opticdev.marvin.runtime.pattern
 
 object Helpers {
 
-  def trimWhiteSpace(seq: Seq[PatternComponent]) = {
+  def trimWhiteSpace(seq: Seq[PatternComponent]): Seq[PatternComponent] = {
+    if (seq.isEmpty) return seq
     var trimOff = 0
     var last = seq.last
     while (last.isWhitespace) {

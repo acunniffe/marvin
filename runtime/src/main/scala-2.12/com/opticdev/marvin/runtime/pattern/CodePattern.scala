@@ -63,6 +63,7 @@ case class CodePattern(components: PatternComponent*) {
       case PropertyBinding(key)=> primitives(key).codeString
       case SymbolComponent(raw) => raw
       case Space => codeStyles.space
+      case Empty => ""
       case ChildNode(key) => {
         val node = properties(key).asInstanceOf[BaseAstNode]
 

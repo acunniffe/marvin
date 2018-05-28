@@ -4,7 +4,7 @@ organization := "com.opticdev"
 
 scalaVersion := "2.12.3"
 
-version in ThisBuild := "0.1.2"
+version in ThisBuild := "0.1.3"
 
 lazy val common = project.
   settings(Common.settings: _*).

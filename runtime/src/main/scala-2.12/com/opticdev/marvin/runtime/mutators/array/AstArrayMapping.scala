@@ -36,10 +36,11 @@ class AstArrayMapping(var items: Seq[AstMapping])(implicit childNodeList: ChildN
 
 }
 
-case class AstMapping(before: Option[String], raw: String, node: BaseAstNode) {
-  def mkString = before.getOrElse("") + raw
-  def withBefore(b: Option[String]) =
-    AstMapping(b, raw, node)
+case class AstMapping(before: Option[String], after: Option[String], raw: String, node: BaseAstNode) {
+  def mkString = before.getOrElse("") + raw + after.getOrElse("")
+  def withBefore(b: Option[String]) = this.copy(before = b)
+  def withAfter(a: Option[String]) = this.copy(after, a)
+
 }
 
 object AstArrayMapping {
@@ -49,15 +50,26 @@ object AstArrayMapping {
       new AstArrayMapping(Seq())
     } else if (seq.size == 1) {
       val node = seq.head
-      new AstArrayMapping(Seq(AstMapping(None, raw.substring(node.range.start, node.range.end ), node)))
+      new AstArrayMapping(Seq(AstMapping(None, None, raw.substring(node.range.start, node.range.end ), node)))
     } else {
-      val node = seq.head
 
+      val beforeAfterMapping: Map[(AstNode, AstNode), (Option[String], Option[String])] = seq.zip(seq.tail).map {
+        case (a, b) => {
+          (a,b) -> splitAtDelineator(raw.substring(a.range.end, b.range.start), childNodeList.topDelineator, seq.indexOf(b) == 0)
+        }
+      }.toMap
+
+      def beforeFor(n: AstNode) = beforeAfterMapping.find(_._1._2 == n).flatMap(_._2._2)
+      def afterFor(n: AstNode) = beforeAfterMapping.find(_._1._1 == n).flatMap(_._2._1)
+
+
+      val node = seq.head
       val mappings: Seq[AstMapping] =
-      AstMapping(None, raw.substring(node.range.start, node.range.end ), node) +:
+      AstMapping(None, afterFor(node), raw.substring(node.range.start, node.range.end ), node) +:
       seq.zip(seq.tail).map {
         case (a, b) => AstMapping(
-          Some(raw.substring(a.range.end, b.range.start )),
+          beforeFor(b),
+          afterFor(b),
           raw.substring(b.range.start, b.range.end ),
           b
         )
@@ -65,6 +77,39 @@ object AstArrayMapping {
 
       new AstArrayMapping(mappings)
     }
+  }
+
+  def splitAtDelineator(betweenString: String, delineator: String, isLast: Boolean) : (Option[String], Option[String]) /* After A, Before B */  = {
+    val lastIndex = betweenString.lastIndexOf(delineator)
+
+    if (betweenString.isEmpty) {
+      (None, None)
+    } else if (isLast) {
+      (Some(betweenString), None)
+    } else if (lastIndex != -1) {
+      val after = betweenString.substring(0, lastIndex)
+      val before = betweenString.substring(lastIndex)
+
+      val afterOption = if (after.isEmpty) {
+        None
+      } else {
+        Some(after)
+      }
+
+      val beforeOption = if (before.isEmpty) {
+        None
+      } else {
+        Some(before)
+      }
+
+      (afterOption, beforeOption)
+
+    } else {
+      (Some(betweenString), None)
+    }
 
   }
+
+
+
 }

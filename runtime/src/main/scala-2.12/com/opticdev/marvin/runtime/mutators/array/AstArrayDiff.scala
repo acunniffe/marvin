@@ -40,10 +40,10 @@ object AstArrayDiff {
               val astMapping = i.data match {
                 case nan: NewAstNode => {
                   if (nan.forceContent.isDefined) {
-                    AstMapping(Some(childNodeList.topDelineator), nan.forceContent.get, nan)
+                    AstMapping(Some(childNodeList.topDelineator), None, nan.forceContent.get, nan)
                   } else {
                     val generated = nan.mutator.generate(nan.properties)
-                    AstMapping(Some(childNodeList.topDelineator), generated, nan)
+                    AstMapping(Some(childNodeList.topDelineator), None, generated, nan)
                   }
                 }
                 case an: AstNode => mappingStore.find(_.node == an).get

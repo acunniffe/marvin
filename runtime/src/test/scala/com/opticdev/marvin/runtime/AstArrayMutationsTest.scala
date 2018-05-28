@@ -8,6 +8,7 @@ import com.opticdev.marvin.runtime.mutators.MutatorImplicits._
 import com.opticdev.parsers.SourceParserManager
 import org.scalatest.FunSpec
 import SampleJsNodes._
+import com.opticdev.marvin.runtime.mutators.array.AstArrayMapping
 
 class AstArrayMutationsTest extends MarvinRuntimeTestBase {
 
@@ -70,6 +71,39 @@ class AstArrayMutationsTest extends MarvinRuntimeTestBase {
         assert(updatedString == "call(4, 1, go( 2 ), 3)")
 
       }
+
+
+      it("can append an item while preserving formatting and comments") {
+
+        implicit val fileContents = "     call(1/*test*/, go( 2 ), 3)"
+        lazy val callExpression = stringToAstNode(fileContents).properties("expression").asInstanceOf[AstNode]
+
+
+        val newProperties = Map("arguments" -> AstArray(callExpression.properties("arguments").asInstanceOf[AstArray].children :+
+          NewAstNode("Literal", Map("value" -> AstNumber(4))): _*))
+
+        val updatedString = callExpression.mutator.applyChanges(callExpression.asInstanceOf[AstNode], newProperties)
+
+        assert(updatedString == "call(1/*test*/, go( 2 ), 3, 4)")
+
+      }
+
+      it("can insert an item into the middle of a list while preserving formatting and comments") {
+
+        implicit val fileContents = "     call(1, go( 2 )/*test*/, 3)"
+        lazy val callExpression = stringToAstNode(fileContents).properties("expression").asInstanceOf[AstNode]
+
+        val array = callExpression.properties("arguments").asInstanceOf[AstArray].children
+          .patch(2, Seq(NewAstNode("Literal", Map("value" -> AstNumber(4)))), 0)
+
+        val newProperties = Map("arguments" -> AstArray(array: _*))
+
+        val updatedString = callExpression.mutator.applyChanges(callExpression.asInstanceOf[AstNode], newProperties)
+
+        assert(updatedString == "call(1, go( 2 )/*test*/, 4, 3)")
+
+      }
+
 
     }
 
@@ -196,8 +230,22 @@ class AstArrayMutationsTest extends MarvinRuntimeTestBase {
   }
 
 
+  describe("Split at delineator") {
 
+    it("returns None, None when empty") {
+      assert(AstArrayMapping.splitAtDelineator("", ", ", false) == (None, None))
+    }
 
+    it("properly sets after and before") {
+      assert(AstArrayMapping.splitAtDelineator("/*testing, even this*/, /*starting*/", ", ", false)
+        == (Some("/*testing, even this*/"), Some(", /*starting*/")))
+    }
 
+    it("when last item all goes after") {
+      assert(AstArrayMapping.splitAtDelineator("/*testing, even this*/", ", ", true)
+        == (Some("/*testing, even this*/"), None))
+    }
+
+  }
 
 }

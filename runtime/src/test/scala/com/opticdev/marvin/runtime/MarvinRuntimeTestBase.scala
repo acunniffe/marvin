@@ -9,10 +9,10 @@ import org.scalatest.FunSpec
 
 
 trait MarvinRuntimeTestBase extends FunSpec {
-  SourceParserManager.installParser(System.getProperty("user.home")+"/Developer/knack/parsers/javascript-lang/target/scala-2.12/javascript-lang_2.12-1.0.jar")
+  SourceParserManager.installParser(System.getProperty("user.home")+"/Developer/knack/parsers/javascript-lang/target/scala-2.12/es7_2.12-1.0.0.jar")
   implicit val parser = SourceParserManager.installedParsers.head
   def stringToAstNode(implicit fileContents: String): AstNode = {
-    val parsed = SourceParserManager.parseString(fileContents, "Javascript")
+    val parsed = SourceParserManager.parseString(fileContents, "es7")
     import com.opticdev.parsers.graph.GraphImplicits._
     implicit val astgraph = parsed.get.graph
     astgraph.root.get.children.head._2.toMarvinAstNode

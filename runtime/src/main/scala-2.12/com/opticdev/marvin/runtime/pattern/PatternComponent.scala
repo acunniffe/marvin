@@ -18,6 +18,7 @@ case class PropertyBinding(key: String) extends PatternComponent
 
 sealed trait Whitespace extends PatternComponent
 case object Space extends Whitespace
+case object Empty extends Whitespace
 case object Indentation extends Whitespace
 case object Line extends Whitespace
 
