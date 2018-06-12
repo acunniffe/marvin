@@ -57,7 +57,7 @@ abstract class PatternMatcher {
           val matchResult = regexToPattern.matches(substring).get
 
 
-          val patternComponent = regexToPattern.patternComponent(matchResult.toString)
+          val patternComponent: PatternComponent = regexToPattern.patternComponent(matchResult.toString)
 
           val end = matchResult.end + head
 
@@ -69,14 +69,13 @@ abstract class PatternMatcher {
           head = end
 
         } else {
-          println(raw(head))
           head += 1
           throw new Error("No pattern mapping for Node "+astNode+" starting at "+substring)
         }
       }
     }
 
-    patternBuffer.toSeq
+    Helpers.dedupeWhiteSpace(patternBuffer.toSeq)
   }
 
   def getDelineators(astArray: AstArray, fileContents: String) = {

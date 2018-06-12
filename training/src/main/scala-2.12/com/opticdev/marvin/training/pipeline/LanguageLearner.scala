@@ -44,7 +44,7 @@ abstract class LanguageLearner {
   def samplesFromCorpus : Vector[Sample] = {
     corpus.toVector.flatMap(file => {
         implicit val fileContents = scala.io.Source.fromFile(file.getPath).mkString
-        val result = Try(parser.parseString(fileContents))
+        val result = parser.parseStringWithProxies(fileContents)
         if (result.isSuccess) {
           GraphConverter
             .toSamples(parser, result.get.graph, fileContents, patternMatcher, ignoredTypes)
