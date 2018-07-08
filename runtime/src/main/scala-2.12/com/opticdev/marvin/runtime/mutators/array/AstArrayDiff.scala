@@ -5,7 +5,7 @@ import com.opticdev.marvin.runtime.pattern.ChildNodeList
 import de.digitalistbesser.diff.algorithms.MillerMyersDiffAlgorithm
 import de.digitalistbesser.diff.{Delete, Insert, Match}
 import com.opticdev.marvin.runtime.mutators.MutatorImplicits._
-import com.opticdev.marvin.runtime.mutators.NodeMutatorMap
+import com.opticdev.marvin.runtime.mutators.{MarvinIntermediatePatch, MarvinIntermediatePatchTracker, NodeMutatorMap}
 
 object AstArrayDiff {
   private val diffStrategy = new MillerMyersDiffAlgorithm[Seq[BaseAstNode], BaseAstNode]
@@ -18,7 +18,7 @@ object AstArrayDiff {
                           contents: String,
                           fileContents: String,
                           start: Int,
-                          end: Int) (implicit nodeMutatorMap: NodeMutatorMap): String = {
+                          end: Int) (implicit nodeMutatorMap: NodeMutatorMap, patchTracker: MarvinIntermediatePatchTracker): String = {
 
     implicit val childNodeList = cnL
 
@@ -52,7 +52,6 @@ object AstArrayDiff {
               astArrayMapping.insertAt(targetIndex + offset, astMapping)
 
               offset += 1
-
             }
             case d: Delete[BaseAstNode] => {
               val removalIndex = targetIndex + offset

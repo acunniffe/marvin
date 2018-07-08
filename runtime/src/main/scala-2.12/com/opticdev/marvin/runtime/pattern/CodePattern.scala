@@ -1,7 +1,7 @@
 package com.opticdev.marvin.runtime.pattern
 
 import com.opticdev.marvin.common.ast._
-import com.opticdev.marvin.runtime.mutators.NodeMutatorMap
+import com.opticdev.marvin.runtime.mutators.{MarvinIntermediatePatch, MarvinIntermediatePatchTracker, NodeMutatorMap}
 import com.opticdev.marvin.runtime.mutators.MutatorImplicits._
 import com.opticdev.marvin.runtime.mutators.array.AstArrayDiff
 
@@ -66,7 +66,7 @@ case class CodePattern(components: PatternComponent*) {
       CodePatternMatch(false, None)
   }
 
-  def generate(properties: AstProperties)(implicit nodeMutatorMap: NodeMutatorMap) : String = {
+  def generate(properties: AstProperties)(implicit nodeMutatorMap: NodeMutatorMap, patchTracker: MarvinIntermediatePatchTracker) : String = {
 
     val primitives = properties.filter(_._2.isPrimitive)
     val nodes      = properties.filter(_._2.isInAst)
@@ -90,7 +90,14 @@ case class CodePattern(components: PatternComponent*) {
       case ChildNodeList(key, topDelineator) => {
         val nodes = properties.getOrElse(key, AstArray()).asInstanceOf[AstArray]
         nodes.children.map {
-          case a: NewAstNode => a.forceContent.getOrElse(a.mutator.generate(a.properties))
+          case a: NewAstNode => {
+
+            if (a.forceContent.isDefined) {
+              patchTracker.append(MarvinIntermediatePatch(Range(0, a.forceContent.get.size), a.forceContent.get))
+            }pappacppcomcoms
+
+            a.forceContent.getOrElse(a.mutator.generate(a.properties))
+          }
           case n: AstNode => n.mutator.generate(n.properties)
         }.mkString(topDelineator)
       }
@@ -101,7 +108,7 @@ case class CodePattern(components: PatternComponent*) {
 
 case class EmbodiedCodePattern(raw: String, fileContents: String, originalComponents: Seq[RangedPatternComponent]) {
 
-  def update(propertiesSubset: AstProperties, oldProperties: AstProperties)(implicit nodeMutatorMap: NodeMutatorMap) : String = {
+  def update(propertiesSubset: AstProperties, oldProperties: AstProperties)(implicit nodeMutatorMap: NodeMutatorMap, patchTracker: MarvinIntermediatePatchTracker) : String = {
 
     val primitives = propertiesSubset.filter(_._2.isPrimitive)
     val nodes      = propertiesSubset.filter(_._2.isAstNode)
@@ -126,8 +133,12 @@ case class EmbodiedCodePattern(raw: String, fileContents: String, originalCompon
             val node = propertyNodeOption.get
 
             node match {
-              case a:NewAstNode => a.forceContent.getOrElse(a.mutator.generate(a.properties))
-              case astNode: AstNode => astNode.mutator.generate(astNode.properties)
+              case a:NewAstNode => {
+                patchTracker.append(MarvinIntermediatePatch(Range(start, end), a.forceContent.getOrElse(a.mutator.generate(a.properties))))
+              }
+              case astNode: AstNode => {
+                patchTracker.append(MarvinIntermediatePatch(Range(start, end), astNode.mutator.generate(astNode.properties)))
+              }
             }
 
           } else {
@@ -149,49 +160,6 @@ case class EmbodiedCodePattern(raw: String, fileContents: String, originalCompon
               fileContents,
               start,
               end)
-//            val diff = AstArrayDiff.between(originalArrayNodeOption.get.asInstanceOf[AstArray].children, arrayNodeOption.get.asInstanceOf[AstArray].children)
-//
-//            val astArray = arrayNodeOption.get.asInstanceOf[AstArray]
-//            if (astArray.children.isEmpty) {
-//              ""
-//            } else if (astArray.children.size == 1) {
-//
-//              astArray.children.head match {
-//                case newAstNode: NewAstNode => {
-//                  if (newAstNode.forceContent.isDefined) newAstNode.forceContent.get else
-//                  newAstNode.mutator.generate(newAstNode.properties)
-//                }
-//                case astNode: AstNode => raw.substring(astNode.range.start, astNode.range.end)
-//              }
-//
-//            } else {
-//              val withIndices = astArray.children.zipWithIndex
-//
-//              withIndices.map(i=> {
-//                val index = i._2
-//                val isFirst = index == 0
-//                val isLast = index == withIndices.size -1
-//
-//                i._1 match {
-//                  case newAstNode: NewAstNode => {
-//                    topDelineator + (if (newAstNode.forceContent.isDefined) newAstNode.forceContent.get else
-//                      newAstNode.mutator.generate(newAstNode.properties))
-//
-//                  }
-//                  case astNode: AstNode => {
-//
-//                    val padding = if (isFirst) "" else {
-//                      withIndices(index -1)._1 match {
-//                        case beforeNode: AstNode => raw.substring(beforeNode.range.end, astNode.range.start)
-//                        case newNode: NewAstNode => topDelineator
-//                      }
-//                    }
-//                    padding + raw.substring(astNode.range.start, astNode.range.end)
-//                  }
-//                }
-//
-//              }).mkString
-//            }
 
           } else {
             raw.substring(start, end)

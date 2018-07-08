@@ -14,6 +14,9 @@ object Helpers {
   }
 
   def dedupeWhiteSpace(seq: Seq[RangedPatternComponent]): Seq[RangedPatternComponent] = {
+
+    if (seq.isEmpty) return seq
+
     val mutable = scala.collection.mutable.ListBuffer(seq:_*)
 
     val withIndex = seq.zipWithIndex

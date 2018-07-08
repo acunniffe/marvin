@@ -1,6 +1,7 @@
 package com.opticdev.marvin.runtime.mutators.array
 
-import com.opticdev.marvin.common.ast.{AstNode, BaseAstNode}
+import com.opticdev.marvin.common.ast.{AstNode, BaseAstNode, NewAstNode}
+import com.opticdev.marvin.runtime.mutators.{MarvinIntermediatePatch, MarvinIntermediatePatchTracker}
 import com.opticdev.marvin.runtime.pattern.ChildNodeList
 
 class AstArrayMapping(var items: Seq[AstMapping])(implicit childNodeList: ChildNodeList) {
@@ -29,9 +30,17 @@ class AstArrayMapping(var items: Seq[AstMapping])(implicit childNodeList: ChildN
     }
   }
 
-  def mkString : String = {
+  def mkString()(implicit patchTracker: MarvinIntermediatePatchTracker) : String = {
     cleanup
-    mappings.map(_.mkString).mkString
+    val allStrings = mappings.zipWithIndex.map{
+      case (mapping, index) => (index, mapping, mapping.mkString)
+    }
+    allStrings.filter(_._2.node.isInstanceOf[NewAstNode]).foreach(i=> { //track insertion patches
+      val start = allStrings.splitAt(i._1)._1.map(_._3).mkString.length
+      patchTracker.append(MarvinIntermediatePatch(Range(start, start + i._3.length), i._3))
+    })
+
+    allStrings.map(_._3).mkString
   }
 
 }
