@@ -4,7 +4,7 @@ organization := "com.opticdev"
 
 scalaVersion := "2.12.3"
 
-version in ThisBuild := "0.1.4"
+version in ThisBuild := "0.2.1"
 
 lazy val common = project.
   settings(Common.settings: _*).
@@ -25,5 +25,8 @@ lazy val training = project.
 
 lazy val root = (project in file(".")).
     settings(Common.settings: _*).
+    settings(
+      test in assembly := {},
+    ).
     aggregate(common, runtime, training)
 

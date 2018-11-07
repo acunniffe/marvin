@@ -2,8 +2,9 @@ package com.opticdev.marvin.training.pipeline
 
 import com.opticdev.marvin.runtime.pattern.PatternMatcher
 import com.opticdev.marvin.training.rulesengine.Sample
-import com.opticdev.parsers.{AstGraph, ParserBase}
-import com.opticdev.parsers.graph.CommonAstNode
+import com.opticdev.common.graph.AstGraph
+import com.opticdev.common.graph.CommonAstNode
+import com.opticdev.parsers.ParserBase
 
 
 object GraphConverter {

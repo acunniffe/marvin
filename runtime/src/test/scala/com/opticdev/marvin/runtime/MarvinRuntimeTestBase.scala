@@ -13,7 +13,7 @@ trait MarvinRuntimeTestBase extends FunSpec {
   implicit val parser = SourceParserManager.installedParsers.head
   def stringToAstNode(implicit fileContents: String): AstNode = {
     val parsed = SourceParserManager.parseStringWithProxies(fileContents, "es7")
-    import com.opticdev.parsers.graph.GraphImplicits._
+    import com.opticdev.common.graph.GraphImplicits._
     implicit val astgraph = parsed.get.graph
     astgraph.root.get.children.head._2.toMarvinAstNode
   }

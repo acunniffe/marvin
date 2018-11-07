@@ -2,7 +2,7 @@ package com.opticdev.marvin.common.ast
 
 import com.opticdev.marvin.common.helpers.LineOperations
 import com.opticdev.marvin.common.leading_whitespace.{Indent, IndentCalc, LeadingSpace}
-import com.opticdev.parsers.AstGraph
+import com.opticdev.common.graph.AstGraph
 
 import scala.util.Try
 

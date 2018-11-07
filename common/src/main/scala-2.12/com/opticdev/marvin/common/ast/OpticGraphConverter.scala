@@ -1,7 +1,8 @@
 package com.opticdev.marvin.common.ast
 
-import com.opticdev.parsers.{AstGraph, ParserBase}
-import com.opticdev.parsers.graph.{CommonAstNode, Child}
+import com.opticdev.common.graph.AstGraph
+import com.opticdev.common.graph.{Child, CommonAstNode}
+import com.opticdev.parsers.ParserBase
 import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsString}
 
 object OpticGraphConverter {

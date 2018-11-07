@@ -1,7 +1,7 @@
 package com.opticdev.marvin.common.helpers
 
 import com.opticdev.marvin.common.ast.AstNode
-import com.opticdev.parsers.graph.CommonAstNode
+import com.opticdev.common.graph.CommonAstNode
 
 object InRangeImplicits {
   implicit class InRangeString(string: String) {

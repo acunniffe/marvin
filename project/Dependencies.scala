@@ -7,7 +7,8 @@ object Dependencies {
     "org.scalactic" %% "scalactic" % "3.0.1",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "commons-io" % "commons-io" % "2.5",
-    "com.opticdev" %% "parser-foundation" % "0.1.4",
+    "com.opticdev" %% "common" % "2.0.8",
+    "com.opticdev" %% "parser-foundation" % "0.2.1",
     "org.scala-lang" % "scala-reflect" % "2.12.3"
   )
 

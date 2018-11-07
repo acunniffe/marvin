@@ -94,7 +94,7 @@ case class CodePattern(components: PatternComponent*) {
 
             if (a.forceContent.isDefined) {
               patchTracker.append(MarvinIntermediatePatch(Range(0, a.forceContent.get.size), a.forceContent.get))
-            }pappacppcomcoms
+            }
 
             a.forceContent.getOrElse(a.mutator.generate(a.properties))
           }
